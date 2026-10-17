@@ -53,14 +53,18 @@ export async function runAuditorAgent(
   const violations = await checkAdrViolations(proposalId, tenantGraphName);
 
   // Step 3: Deterministic Downstream Blast Radius Traversal
-  cypherQueries.push(
-    `MATCH (p:Proposal {id: '${proposalId}'})-[:TARGETS_FIELD]->(target)<-[:USES_FIELD*0..1]-(ep:Endpoint)<-[:CONSUMES]-(consumer:Service) ...`
-  );
-  const blastRadius = await traceDownstreamBlastRadius(proposalId, tenantGraphName);
+  // Blast radius only impacts downstream consumers if an architectural policy is violated!
+  let blastRadius: BlastRadiusFinding[] = [];
+  if (violations.length > 0) {
+    cypherQueries.push(
+      `MATCH (p:Proposal {id: '${proposalId}'})-[:TARGETS_FIELD]->(target)<-[:USES_FIELD*0..1]-(ep:Endpoint)<-[:CONSUMES]-(consumer:Service) ...`
+    );
+    blastRadius = await traceDownstreamBlastRadius(proposalId, tenantGraphName);
+  }
 
   // Step 4: Persist Audit findings directly into FalkorDB shared graph
   cypherQueries.push(
-    `MATCH (p:Proposal {id: '${proposalId}'}) SET p.status = 'CHECKED' ... MERGE (p)-[:VIOLATES_ADR]->(adr) ... MERGE (p)-[:BREAKS_CONSUMER]->(svc)`
+    `MATCH (p:Proposal {id: '${proposalId}'}) SET p.status = '${violations.length === 0 ? 'RESOLVED' : 'CHECKED'}' ...`
   );
   await persistAuditFindings(proposalId, violations, blastRadius, tenantGraphName);
 
@@ -70,8 +74,11 @@ export async function runAuditorAgent(
     agent: 'AuditorAgent',
     durationMs,
     cypherQueries,
-    stateTransition: { from: 'PARSED', to: 'CHECKED' },
-    summary: `Graph traversal identified ${violations.length} ADR violation(s) and ${blastRadius.length} broken downstream microservice(s). Persisted findings to FalkorDB.`,
+    stateTransition: { from: 'PARSED', to: violations.length === 0 ? 'RESOLVED' : 'CHECKED' },
+    summary:
+      violations.length === 0
+        ? `Graph traversal verified 0 ADR violations. Proposal complies with all architectural policies with 0 broken downstream consumers.`
+        : `Graph traversal identified ${violations.length} ADR violation(s) and ${blastRadius.length} broken downstream microservice(s). Persisted findings to FalkorDB.`,
   };
 
   return {

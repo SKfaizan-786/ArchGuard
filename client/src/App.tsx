@@ -127,6 +127,9 @@ export const App: React.FC = () => {
       clearTimeout(stepTimer2);
 
       setAuditPayload(payload);
+      if (payload.proposal?.title) {
+        setProposalTitle(payload.proposal.title);
+      }
       setHighlightedPath(payload.highlightedPath);
 
       if (payload.graphTopology?.nodes) {
@@ -223,7 +226,14 @@ export const App: React.FC = () => {
             selectedPresetId={selectedPresetId}
             rawInput={rawInput}
             onSelectPreset={handleSelectPreset}
-            onChangeRawInput={setRawInput}
+            onChangeRawInput={(val) => {
+              setRawInput(val);
+              const currentPreset = presets.find((p) => p.id === selectedPresetId);
+              if (currentPreset && val.trim() !== currentPreset.rawInput.trim()) {
+                setSelectedPresetId(null);
+                setProposalTitle('');
+              }
+            }}
             onExecuteAudit={handleExecuteAudit}
             isAuditing={isAuditing}
             isCollapsed={viewMode !== 'split' || isLeftCollapsed}

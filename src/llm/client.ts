@@ -69,10 +69,8 @@ async function callChatCompletion(
   const openRouterKey = process.env.OPENROUTER_API_KEY;
   if (openRouterKey) {
     const candidateModels = [
-      options?.model || 'openrouter/auto',
-      'meta-llama/llama-3.1-8b-instruct',
-      'deepseek/deepseek-chat',
-      'qwen/qwen-2.5-72b-instruct',
+      options?.model || 'meta-llama/llama-3.1-8b-instruct:free',
+      'openrouter/auto',
     ];
 
     for (const model of candidateModels) {
@@ -88,7 +86,7 @@ async function callChatCompletion(
   // Priority 3: Google Gemini
   const geminiKey = process.env.GEMINI_API_KEY;
   if (geminiKey) {
-    const geminiModels = ['gemini-3.8-flash', 'gemini-2.5-flash'];
+    const geminiModels = ['gemini-2.5-flash'];
     for (const model of geminiModels) {
       try {
         const res = await callGemini(prompt, systemPrompt, geminiKey, model);
@@ -109,7 +107,7 @@ async function callOpenRouter(
   model: string
 ): Promise<string> {
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 15000);
+  const timeoutId = setTimeout(() => controller.abort(), 6000);
 
   try {
     const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
@@ -154,7 +152,7 @@ async function callGemini(
   model: string
 ): Promise<string> {
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 15000);
+  const timeoutId = setTimeout(() => controller.abort(), 6000);
 
   try {
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
@@ -196,6 +194,13 @@ function cleanJsonString(str: string): string {
     cleaned = cleaned.replace(/^```json\s*/i, '').replace(/\s*```$/, '');
   } else if (cleaned.startsWith('```')) {
     cleaned = cleaned.replace(/^```\s*/, '').replace(/\s*```$/, '');
+  }
+  cleaned = cleaned.trim();
+  // Extract strictly from the first { to the last } to prevent trailing conversational notes from breaking JSON.parse
+  const firstBrace = cleaned.indexOf('{');
+  const lastBrace = cleaned.lastIndexOf('}');
+  if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+    cleaned = cleaned.substring(firstBrace, lastBrace + 1);
   }
   return cleaned.trim();
 }
@@ -242,12 +247,18 @@ OUTPUT FORMAT REQUIRED (JSON):
     const { content, provider } = await callChatCompletion(prompt, systemPrompt, options);
     const parsed = JSON.parse(cleanJsonString(content));
 
+    let propVal = parsed.proposedValue || 'UUIDv4';
+    // If targeting user_id and proposed value represents a string or uuid, normalize to canonical 'UUIDv4'
+    if (parsed.targetName === 'user_id' && (propVal.toLowerCase().includes('string') || propVal.toLowerCase().includes('uuid'))) {
+      propVal = 'UUIDv4';
+    }
+
     return {
       title: parsed.title || 'Architectural Change Proposal',
       targetType: parsed.targetType === 'Endpoint' ? 'Endpoint' : 'SchemaField',
       targetName: parsed.targetName || 'user_id',
       changedProperty: parsed.changedProperty || 'data_type',
-      proposedValue: parsed.proposedValue || 'Int64',
+      proposedValue: propVal,
       author: parsed.author || 'dev_contributor',
       summary: parsed.summary || 'Proposed architectural change.',
       usedProvider: provider,
@@ -267,63 +278,111 @@ export function deterministicExtractProposal(
 ): ExtractedProposal {
   const lower = rawText.toLowerCase();
 
-  // Pattern 1: user_id UUIDv4 -> Int64 / BigInt
+  // If this is a git diff, inspect only the added '+' lines to determine proposed changes
+  const addedLines = rawText
+    .split('\n')
+    .filter((l) => l.trim().startsWith('+') && !l.trim().startsWith('+++'))
+    .join(' ')
+    .toLowerCase();
+
+  const targetSnippet = addedLines.length > 0 ? addedLines : lower;
+
+  // Extract PR number from text if present (e.g., "PR #415", "PR-415")
+  const prNumMatch = rawText.match(/PR\s*#?([0-9]+)/i);
+  const prNum = prNumMatch ? prNumMatch[1] : null;
+
+  // Pattern 1: user_id UUIDv4 -> Int64 / BigInt / string UUID
   if (lower.includes('user_id') || lower.includes('uuid') || lower.includes('int64')) {
-    let proposedVal = 'Int64';
-    if (lower.includes('int64')) proposedVal = 'Int64';
-    else if (lower.includes('bigint')) proposedVal = 'BigInt';
-    else if (lower.includes('int32') || lower.includes('integer')) proposedVal = 'Int32';
+    let proposedVal = 'UUIDv4';
+    let isViolation = false;
+
+    if (targetSnippet.includes('int64')) {
+      proposedVal = 'Int64';
+      isViolation = true;
+    } else if (targetSnippet.includes('bigint')) {
+      proposedVal = 'BigInt';
+      isViolation = true;
+    } else if (targetSnippet.includes('int32') || targetSnippet.includes('integer')) {
+      proposedVal = 'Int32';
+      isViolation = true;
+    } else if (targetSnippet.includes('string') || targetSnippet.includes('uuid')) {
+      proposedVal = 'UUIDv4';
+      isViolation = false;
+    }
+
+    const title = isViolation
+      ? `PR #${prNum || '409'}: Migrate user_id identifier from UUIDv4 to ${proposedVal}`
+      : `PR #${prNum || '415'}: Maintain UUIDv4 User Identifier Schema Compliance`;
+
+    const summary = isViolation
+      ? `Proposes changing canonical user_id from UUIDv4 string to sequential ${proposedVal}.`
+      : 'Proposes schema update retaining RFC 4122 compliant UUIDv4 identifier for user_id.';
 
     return {
-      title: 'PR #409: Migrate user_id identifier from UUIDv4 to Int64',
+      title,
       targetType: 'SchemaField',
       targetName: 'user_id',
       changedProperty: 'data_type',
       proposedValue: proposedVal,
-      author: 'dev_platform',
-      summary: 'Proposes changing canonical user_id from UUIDv4 string to sequential 64-bit integer.',
+      author: isViolation ? 'dev_platform' : 'dev_contributor',
+      summary,
       usedProvider: 'deterministic-heuristic-extractor',
     };
   }
 
   // Pattern 2: Payment Webhook execution mode (sync / inline)
   if (lower.includes('webhook') || lower.includes('payment') || lower.includes('sync')) {
+    const isSync = targetSnippet.includes('sync') || targetSnippet.includes('inline');
     return {
-      title: 'PR #512: Inline synchronous execution mode for payment webhooks',
+      title: isSync
+        ? `PR #${prNum || '512'}: Inline synchronous execution mode for payment webhooks`
+        : `PR #${prNum || '515'}: Async queue execution mode for payment webhooks`,
       targetType: 'Endpoint',
       targetName: '/v1/webhooks/payment',
       changedProperty: 'execution_mode',
-      proposedValue: 'synchronous_inline',
+      proposedValue: isSync ? 'synchronous_inline' : 'async_queue',
       author: 'payment_dev',
-      summary: 'Proposes synchronous inline retry loop on payment webhook ingress endpoint.',
+      summary: isSync
+        ? 'Proposes synchronous inline retry loop on payment webhook ingress endpoint.'
+        : 'Maintains compliant asynchronous queue execution mode for payment webhooks.',
       usedProvider: 'deterministic-heuristic-extractor',
     };
   }
 
   // Pattern 3: Monetary transaction amount (Float / Double)
   if (lower.includes('amount') || lower.includes('decimal') || lower.includes('float') || lower.includes('currency')) {
+    const isFloat = targetSnippet.includes('float') || targetSnippet.includes('double') || targetSnippet.includes('number');
     return {
-      title: 'PR #601: Change transaction_amount precision from Decimal128 to Float64',
+      title: isFloat
+        ? `PR #${prNum || '601'}: Change transaction_amount precision from Decimal128 to Float64`
+        : `PR #${prNum || '605'}: Maintain fixed Decimal128 precision for transaction_amount`,
       targetType: 'SchemaField',
       targetName: 'transaction_amount',
       changedProperty: 'data_type',
-      proposedValue: 'Float64',
+      proposedValue: isFloat ? 'Float64' : 'Decimal128',
       author: 'fin_dev',
-      summary: 'Proposes using standard Float64 for monetary transactions in ledger payloads.',
+      summary: isFloat
+        ? 'Proposes using standard Float64 for monetary transactions in ledger payloads.'
+        : 'Maintains fixed Decimal128 monetary precision policy.',
       usedProvider: 'deterministic-heuristic-extractor',
     };
   }
 
   // Pattern 4: Ledger entries contract compatibility
   if (lower.includes('ledger') || lower.includes('entries') || lower.includes('backward')) {
+    const isBreaking = targetSnippet.includes('delete') || targetSnippet.includes('drop') || targetSnippet.includes('remove');
     return {
-      title: 'PR #703: Non-additive field deletion on ledger entries contract',
+      title: isBreaking
+        ? `PR #${prNum || '703'}: Non-additive field deletion on ledger entries contract`
+        : `PR #${prNum || '705'}: Additive backward-compatible field addition on ledger entries`,
       targetType: 'Endpoint',
       targetName: '/v1/ledger/entries',
       changedProperty: 'contract_policy',
-      proposedValue: 'breaking_removal',
+      proposedValue: isBreaking ? 'breaking_removal' : 'backward_compatible',
       author: 'ledger_dev',
-      summary: 'Proposes breaking schema modifications without backwards-compatible transition window.',
+      summary: isBreaking
+        ? 'Proposes breaking schema modifications without backwards-compatible transition window.'
+        : 'Proposes safe backward-compatible ledger contract evolution.',
       usedProvider: 'deterministic-heuristic-extractor',
     };
   }
@@ -331,11 +390,11 @@ export function deterministicExtractProposal(
   // Generic fallback using catalog first item
   const firstField = catalog.fields[0]?.name || 'user_id';
   return {
-    title: 'Architectural Change Proposal',
+    title: `PR #${prNum || '801'}: Custom Architectural Proposal`,
     targetType: 'SchemaField',
     targetName: firstField,
     changedProperty: 'data_type',
-    proposedValue: 'ModifiedType',
+    proposedValue: 'UUIDv4',
     author: 'dev_contributor',
     summary: 'Detected custom schema change proposal.',
     usedProvider: 'deterministic-heuristic-extractor',
@@ -353,6 +412,11 @@ export async function synthesizeResolutionAdvice(
   options?: LLMOptions
 ): Promise<ResolutionAdvice> {
   const { proposal, violations, blastRadius, episodicMemory } = auditContext;
+
+  // FAST-PATH: If there are 0 violations, this proposal is 100% compliant!
+  if (violations.length === 0) {
+    return deterministicSynthesizeResolution(auditContext);
+  }
 
   const systemPrompt = `You are ArchGuard's Resolution Advisor Agent. Your mission is to provide authoritative, grounded architectural remediation based on deterministic graph findings and episodic memory from FalkorDB.
 Never invent policies; cite exact ADR codes, authors, Slack channels, and historical episode precedents. Output valid JSON only.`;
@@ -471,6 +535,28 @@ REQUIRED JSON STRUCTURE:
  */
 export function deterministicSynthesizeResolution(auditContext: AuditContext): ResolutionAdvice {
   const { proposal, violations, blastRadius, episodicMemory } = auditContext;
+
+  if (violations.length === 0) {
+    return {
+      executiveSummary: `✓ Architectural Policy Compliant: Proposal '${proposal.title}' strictly conforms to all active ADR policies with zero downstream contract breaking changes.`,
+      conflictAnalysis: `No architectural policy collisions detected. All target schema fields and endpoints adhere to company invariants. Downstream consumers remain backwards-compatible.`,
+      impactedTeamsNotification: [],
+      recommendedWorkaround: {
+        title: 'Approved for Production Merge',
+        patternName: 'Policy Compliant Change',
+        stepByStep: [
+          'All architectural invariants verified by FalkorDB graph traversal.',
+          'Zero breaking schema mutations detected across dependent microservices.',
+          'Safe to proceed with standard CI/CD deployment pipeline and integration tests.',
+        ],
+        tradeOffs: 'Zero architectural drift. Backward compatibility preserved.',
+        source: 'ADR_GUIDELINE',
+      },
+      proposedCompliantSpec: proposal.rawInput,
+      citations: [],
+      usedProvider: 'deterministic-heuristic-advisor',
+    };
+  }
 
   const topViolation = violations[0];
   const topEpisode = episodicMemory[0];

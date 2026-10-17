@@ -32,12 +32,16 @@ export async function runExtractorAgent(
   // Step 2: Extract structured parameters using grounded catalog
   const extracted = await extractProposalFromRawText(rawInput, catalog, options);
   if (suggestedTitle && suggestedTitle.trim().length > 0) {
-    extracted.title = suggestedTitle;
+    const suggestsInt64 = suggestedTitle.toLowerCase().includes('int64');
+    const isCompliant = extracted.proposedValue === 'UUIDv4' || extracted.proposedValue === 'string';
+    if (!(suggestsInt64 && isCompliant)) {
+      extracted.title = suggestedTitle;
+    }
   }
 
   // Derive proposal ID (e.g., from title if PR number exists, else timestamp)
   const prMatch = extracted.title.match(/PR\s*#?([0-9]+)/i);
-  const proposalId = prMatch ? `PR-${prMatch[1]}` : `PROP-${Date.now()}`;
+  const proposalId = prMatch ? `PR-${prMatch[1]}` : `PR-CUSTOM-${Date.now().toString().slice(-4)}`;
 
   // Step 3: Write :Proposal node into FalkorDB shared graph
   cypherQueries.push(`MERGE (p:Proposal {id: '${proposalId}'}) ... CREATE (p)-[:TARGETS_FIELD]->(target)`);

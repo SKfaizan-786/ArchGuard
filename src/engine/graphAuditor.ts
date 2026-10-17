@@ -36,7 +36,12 @@ export async function createProposalNode(
       p.title = $title,
       p.raw_input = $rawInput,
       p.author = $author,
+      p.target_type = $targetType,
+      p.target_name = $targetName,
       p.status = 'PARSED'
+    WITH p, target
+    OPTIONAL MATCH (p)-[oldR:TARGETS_FIELD]->()
+    DELETE oldR
     CREATE (p)-[r:TARGETS_FIELD {
       changed_property: $changedProperty,
       proposed_value: $proposedValue,
@@ -272,12 +277,17 @@ export async function persistAuditFindings(
   const graph = await getGraph(tenantGraphName);
   const now = new Date().toISOString();
 
-  // 1. Update Proposal status to 'CHECKED'
+  // 1. Update Proposal status and remove stale audit finding edges
+  const targetStatus = violations.length === 0 ? 'RESOLVED' : 'CHECKED';
   await graph.query(
     `MATCH (p:Proposal {id: $proposalId})
-     SET p.status = 'CHECKED',
-         p.checked_at = $checkedAt`,
-    { params: { proposalId, checkedAt: now } }
+     SET p.status = $targetStatus,
+         p.checked_at = $checkedAt
+     WITH p
+     OPTIONAL MATCH (p)-[oldV:VIOLATES_ADR]->()
+     OPTIONAL MATCH (p)-[oldB:BREAKS_CONSUMER]->()
+     DELETE oldV, oldB`,
+    { params: { proposalId, checkedAt: now, targetStatus } }
   );
 
   // 2. Persist [:VIOLATES_ADR] edges
