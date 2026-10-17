@@ -49,6 +49,11 @@ export async function getFullGraphTopology(tenantGraphName?: string): Promise<Gr
   ]);
 
   const rawNodes = (nodesRes.data || []) as any[];
+  if (rawNodes.length === 0) {
+    const { seedDatabase } = await import('../db/seed.js');
+    await seedDatabase(tenantGraphName);
+    return getFullGraphTopology(tenantGraphName);
+  }
   const rawLinks = (linksRes.data || []) as any[];
 
   let teamsCount = 0;
