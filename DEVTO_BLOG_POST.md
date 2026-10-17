@@ -88,7 +88,7 @@ ArchGuard flips the paradigm: **Deterministic Detection, LLM-Explained.**
 
 Instead of asking an LLM to guess whether an architectural decision was violated, ArchGuard compiles company architecture into a high-performance **FalkorDB Knowledge Graph** (`archguard_brain`). 
 
-FalkorDB handles the deterministic graph traversal in **under 15 milliseconds** (often 9ms). The LLM's only job is to translate the raw input diff into AST parameters and synthesize a human-friendly remediation plan from historical precedents.
+FalkorDB handles deterministic graph traversals in **under 15 milliseconds** per Cypher query (with the full multi-agent graph pipeline executing in ~23ms–108ms, compared to 4.0s for LLM synthesis). The LLM's only job is to translate the raw input diff into AST parameters and synthesize a human-friendly remediation plan from historical precedents.
 
 ![ArchGuard Constellation Canvas](https://raw.githubusercontent.com/SKfaizan-786/ArchGuard/main/screenshots/ArchGuard02.png)
 *Figure 1: ArchGuard Command Center showing real-time constellation topology, isolated collision path (red), and multi-hop blast radius.*
@@ -301,10 +301,10 @@ return Array.from(serviceMap.values());
 
 Now, the blast radius accurately reflects **3 distinct Tier-1 microservices**, while displaying all collapsed endpoint paths in the details card.
 
-### 2. The Latency Split: 9ms Graph vs. LLM Time
-One of our proudest architectural decisions was displaying the latency split directly in the Cypher Trace panel:
-- **⚡ FalkorDB Graph Traversal:** `9ms – 14ms`
-- **⏱️ LLM Synthesis Time:** `~1,200ms`
+### 2. The Latency Split: Real-Time Graph Traversal vs. LLM Time
+One of our proudest architectural decisions was displaying the latency split directly in the Telemetry and Cypher Trace panels:
+- **⚡ FalkorDB Graph Traversal:** Individual Cypher queries execute in `0.8ms – 14ms` (with the full multi-agent 5-query traversal pipeline executing in `23ms – 108ms`)
+- **⏱️ LLM Synthesis Time:** `~1,200ms – 4,000ms`
 
 Seeing this in real-time demonstrates the immense power of in-memory graph databases for AI agents. Graph traversal is virtually instantaneous; LLM token streaming is the bottleneck.
 
