@@ -43,16 +43,16 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
   // Pan & Zoom transform state: responsive auto-scale based on viewMode
   const [transform, setTransform] = useState<{ x: number; y: number; k: number }>({
     x: 10,
-    y: 15,
-    k: viewMode === 'canvas' ? 0.85 : 0.51,
+    y: viewMode === 'canvas' ? 45 : 65,
+    k: viewMode === 'canvas' ? 0.84 : 0.51,
   });
 
   // Responsive auto-fit: adapt zoom scale when switching between Split View and Canvas Focus
   React.useEffect(() => {
     if (viewMode === 'canvas') {
-      setTransform({ x: 30, y: 25, k: 0.85 });
+      setTransform({ x: 30, y: 45, k: 0.84 });
     } else {
-      setTransform({ x: 10, y: 15, k: 0.51 });
+      setTransform({ x: 10, y: 65, k: 0.51 });
     }
   }, [viewMode]);
 
@@ -266,9 +266,9 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
 
   const recenter = () => {
     if (viewMode === 'canvas') {
-      setTransform({ x: 30, y: 25, k: 0.85 });
+      setTransform({ x: 30, y: 45, k: 0.84 });
     } else {
-      setTransform({ x: 10, y: 15, k: 0.51 });
+      setTransform({ x: 10, y: 65, k: 0.51 });
     }
   };
 
