@@ -20,3 +20,9 @@ yarn-error.log*
 # System & OS Files
 .DS_Store
 Thumbs.db
+
+# Internal Hackathon Drafts & Scripts (Keep only README.md public)
+/DEVTO_BLOG_POST.md
+/DEMO_VIDEO_SCRIPT.md
+/PRESENTATION_SLIDES.md
+/PROGRESS.md
