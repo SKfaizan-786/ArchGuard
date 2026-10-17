@@ -153,8 +153,18 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
   };
 
   // Node visual styles
-  const getNodeVisual = (label: string, isViolated: boolean) => {
+  const getNodeVisual = (label: string, isViolated: boolean, status?: string) => {
     if (label === 'Proposal') {
+      const isApproved = status === 'RESOLVED';
+      if (isApproved) {
+        return {
+          fill: '#10B981',
+          stroke: '#34D399',
+          filter: 'url(#glow-emerald)',
+          labelColor: 'text-emerald-400',
+          badgeBg: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
+        };
+      }
       return {
         fill: '#F43F5E',
         stroke: '#FB7185',
@@ -475,7 +485,7 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
               }
 
               const isViolated = isHighlighted && (node.label === 'ADR' || node.label === 'SchemaField' || node.label === 'Endpoint');
-              const visual = getNodeVisual(node.label, isViolated);
+              const visual = getNodeVisual(node.label, isViolated, node.properties?.status);
               const isSelected = selectedNode?.id === node.id;
               const isHovered = hoveredNode?.id === node.id;
               const opacity = highlightedNodeIds.size > 0 && !isHighlighted ? 0.25 : 1;
@@ -664,6 +674,10 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
           <div className="flex items-center space-x-1.5">
             <span className="w-2 h-2 rounded-full bg-rose-500 shadow-[0_0_8px_#F43F5E]" />
             <span className="text-neutral-300">:Proposal (Conflict)</span>
+          </div>
+          <div className="flex items-center space-x-1.5">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_#10B981]" />
+            <span className="text-neutral-300">:Proposal (Approved)</span>
           </div>
         </div>
 
