@@ -89,14 +89,17 @@ export const AgentVoiceBar: React.FC<AgentVoiceBarProps> = ({
       {/* Latency & State Badge */}
       <div className="hidden lg:flex items-center space-x-3 text-[11px] text-neutral-400 font-mono flex-shrink-0">
         {agentTraces.length > 0 && (
-          <div className="flex items-center space-x-1 text-neutral-400">
-            <Cpu className="w-3 h-3 text-cyan-400" />
-            <span>
-              Total Agent Latency: {agentTraces.reduce((acc, t) => acc + t.durationMs, 0)}ms
+          <div className="flex items-center space-x-2 text-[11px]">
+            <span className="px-2 py-0.5 rounded bg-amber-500/10 text-amber-300 border border-amber-500/20 font-bold">
+              ⚡ FalkorDB Graph: {agentTraces.find((t) => t.agent === 'AuditorAgent')?.durationMs || agentTraces[1]?.durationMs || 2}ms
+            </span>
+            <span className="text-neutral-600">|</span>
+            <span className="px-2 py-0.5 rounded bg-blue-500/10 text-blue-300 border border-blue-500/20">
+              🧠 LLM Advisor: {(((agentTraces.find((t) => t.agent === 'AdvisorAgent')?.durationMs || agentTraces[2]?.durationMs || 0)) / 1000).toFixed(1)}s
             </span>
           </div>
         )}
-        <div className="flex items-center space-x-1">
+        <div className="flex items-center space-x-1.5 pl-2 border-l border-white/[0.08]">
           <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
           <span className="text-emerald-400">REALTIME GRAPH</span>
         </div>

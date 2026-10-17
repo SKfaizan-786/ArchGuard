@@ -337,7 +337,7 @@ export const LandingGraphHero: React.FC = () => {
           <div className="flex items-center gap-2">
             <span className="text-neutral-500">Multi-Hop Traversal</span>
             <span className="text-white/20">|</span>
-            <span className="text-cyan-400">100% Grounded</span>
+            <span className="text-cyan-400">Deterministic Cypher</span>
           </div>
         </div>
       </div>

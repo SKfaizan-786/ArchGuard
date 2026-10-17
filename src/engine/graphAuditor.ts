@@ -219,16 +219,19 @@ export async function traceDownstreamBlastRadius(
 
   const rawRows = [...(resField.data || []), ...(resEndpoint.data || [])] as any[];
 
-  // Deduplicate by serviceName + viaEndpoint
-  const seen = new Set<string>();
-  const findings: BlastRadiusFinding[] = [];
+  // Deduplicate by distinct serviceName (counting distinct services, not paths)
+  const serviceMap = new Map<string, BlastRadiusFinding>();
 
   for (const r of rawRows) {
-    const key = `${r.serviceName}::${r.viaEndpoint}`;
-    if (seen.has(key)) continue;
-    seen.add(key);
+    const existing = serviceMap.get(r.serviceName);
+    if (existing) {
+      if (r.viaEndpoint && !existing.viaEndpoint.includes(r.viaEndpoint)) {
+        existing.viaEndpoint = `${existing.viaEndpoint}, ${r.viaEndpoint}`;
+      }
+      continue;
+    }
 
-    findings.push({
+    serviceMap.set(r.serviceName, {
       serviceId: r.serviceId,
       serviceName: r.serviceName,
       serviceTier: r.serviceTier || 'tier-1',
@@ -250,7 +253,7 @@ export async function traceDownstreamBlastRadius(
     });
   }
 
-  return findings;
+  return Array.from(serviceMap.values());
 }
 
 /**

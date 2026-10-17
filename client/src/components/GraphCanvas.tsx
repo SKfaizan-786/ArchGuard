@@ -121,6 +121,13 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
     return set;
   }, [highlightedPath]);
 
+  // Auto-isolate collision path as default view once an audit finishes
+  React.useEffect(() => {
+    if (highlightedPath && highlightedPath.nodes && highlightedPath.nodes.length > 0) {
+      setIsolateCollision(true);
+    }
+  }, [highlightedPath]);
+
   // Short badge helper: under circle, render ONLY max 16 chars!
   const getNodeShortCode = (node: GraphNode): string => {
     const props = node.properties || {};

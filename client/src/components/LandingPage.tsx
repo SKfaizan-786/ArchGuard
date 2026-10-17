@@ -125,11 +125,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLaunch, stats }) => 
               </div>
               <div className="flex items-center gap-1.5">
                 <span className="text-emerald-400 font-bold">[✓]</span>
-                <span>Zero LLM Guesswork</span>
+                <span>Deterministic Detection, LLM-Explained</span>
               </div>
               <div className="flex items-center gap-1.5">
                 <span className="text-emerald-400 font-bold">[✓]</span>
-                <span>Episodic Memory Recall</span>
+                <span>Episodic Memory Precedents</span>
               </div>
             </div>
           </div>
@@ -205,7 +205,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLaunch, stats }) => 
               </h3>
 
               <p className="text-xs text-neutral-400 leading-relaxed">
-                Zero hallucinated conflicts. FalkorDB executes multi-hop traversals in sub-millisecond
+                Deterministic conflict detection. FalkorDB executes multi-hop traversals in sub-millisecond
                 time to find exact collisions between PR modifications and enforced ADR policies.
               </p>
             </div>
