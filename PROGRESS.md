@@ -244,12 +244,21 @@ npm run verify:phase2    # Tests Phase 2 3-agent workflow & episodic memory
 - [x] **Deduplicated Downstream Blast Radius:** Aggregated multiple endpoint paths per service into unique downstream consumer entries (`distinct(service)`), eliminating duplicate cards and aligning telemetry count (`3 downstream services`) with LLM advice text.
 - [x] **Latency Split Metric (FalkorDB vs LLM):** Added dedicated latency telemetry in both `AgentVoiceBar` and `AuditResultsPane` (`⚡ FalkorDB Graph: 2ms | 🧠 LLM Advisor: 18.4s`), explicitly showcasing FalkorDB's sub-millisecond in-memory speed.
 - [x] **Auto-Isolate Collision Canvas:** Updated `GraphCanvas` to automatically toggle `Isolate Collision Path` upon audit completion, giving judges an instant, uncluttered view of the conflict subgraph.
-- [x] **Clean PR Compliant State:** Built a dedicated green **`✓ Architectural Policy Compliant`** card (`STATUS: APPROVED_PRE_MERGE`, 0 downstream breaks) for non-violating proposals.
+- [x] **Clean PR Compliant State & Proposal Overwrite Fix (Verified):**
+  - **The Bug Identified:** When editing the raw input terminal from `int64` to `string user_id`, `proposalTitle` previously remained bound to the `PR-409` preset title, re-using `PR-409` and matching stale `Int64` edges from earlier audits in FalkorDB.
+  - **The Fix Applied:**
+    - `onChangeRawInput` in `App.tsx` immediately unselects presets upon edits, switching the terminal badge to `Custom / Edited Spec (Ready to Audit)`.
+    - `extractorAgent.ts` derives dynamic proposal IDs (`PR-CUSTOM-xxxx`) and prevents preset titles from overriding compliant extractions.
+    - `createProposalNode` and `persistAuditFindings` in `graphAuditor.ts` explicitly clear prior relationships before creating fresh ones.
+    - `auditorAgent.ts` sets `blastRadius = []` and status `'RESOLVED'` when `violations.length === 0`.
+    - `client.ts` accurately maps `string user_id` to `UUIDv4`, detecting compliance with ADR-001.
+  - **Verification:** Ran live end-to-end audit on clean spec: verified `0 violations`, `0 blast radius`, status `'RESOLVED'`, and display of the green **`✓ Architectural Policy Compliant`** card!
 - [x] **Refined Marketing Claims:** Replaced absolute claims with precise engineering wording (`Deterministic Detection, LLM-Explained`).
-- [x] **Pushed to GitHub:** Synced to remote `main` at `https://github.com/SKfaizan-786/ArchGuard.git` (`d304a23`).
+- [x] **Pushed to GitHub:** Synced to remote `main` at `https://github.com/SKfaizan-786/ArchGuard.git` (`9bb5376`).
 
 ---
 
 ## 🎯 Next Steps
-1. Test a compliant Clean PR live in UI (confirm green pass).
-2. Test re-run audit on PR-409 to verify 2 recalled precedents.
+1. Verify Clean PR in browser UI (`http://localhost:5173`).
+2. Verify PR-409 recall and live ADR ingestion.
+3. Prepare README and record 2-3 minute demo video.
