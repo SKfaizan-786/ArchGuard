@@ -14,11 +14,9 @@
 
 <br/>
 
-```
-     ┌────────────────────────────────────────────────────────────────────────┐
-     │  "Linters check your syntax. ArchGuard protects your architecture."   │
-     └────────────────────────────────────────────────────────────────────────┘
-```
+<p align="center">
+  <em>“Linters check your syntax. ArchGuard protects your architecture.”</em>
+</p>
 
 </div>
 
@@ -35,7 +33,7 @@
 - [Quickstart & Local Installation](#-quickstart--local-installation)
 - [Live Demo Walkthrough for Judges](#-live-demo-walkthrough-for-judges)
 - [Hackathon Track Alignment](#-hackathon-track-alignment)
-- [License & Acknowledgments](#-license--acknowledgments)
+- [License (MIT)](LICENSE)
 
 ---
 
