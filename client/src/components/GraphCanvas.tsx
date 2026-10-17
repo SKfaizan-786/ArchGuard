@@ -155,7 +155,7 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
   // Node visual styles
   const getNodeVisual = (label: string, isViolated: boolean, status?: string) => {
     if (label === 'Proposal') {
-      const isApproved = status === 'RESOLVED';
+      const isApproved = status === 'RESOLVED' || status === 'APPROVED';
       if (isApproved) {
         return {
           fill: '#10B981',

@@ -119,12 +119,12 @@ export const AuditResultsPane: React.FC<AuditResultsPaneProps> = ({
             <div className="flex items-center space-x-1.5">
               <span
                 className={`text-[10px] font-mono px-2 py-0.5 rounded font-semibold border ${
-                  status === 'RESOLVED'
+                  status === 'RESOLVED' || status === 'APPROVED'
                     ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
-                    : 'bg-amber-500/10 text-amber-400 border-amber-500/30'
+                    : 'bg-rose-500/10 text-rose-400 border-rose-500/30'
                 }`}
               >
-                ● {status || 'PENDING'}
+                ● {status === 'RESOLVED' || status === 'APPROVED' ? 'APPROVED' : (status || 'CONFLICT_DETECTED')}
               </span>
             </div>
           </div>

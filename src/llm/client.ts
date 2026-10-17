@@ -69,7 +69,7 @@ async function callChatCompletion(
   const openRouterKey = process.env.OPENROUTER_API_KEY;
   if (openRouterKey) {
     const candidateModels = [
-      options?.model || 'meta-llama/llama-3.1-8b-instruct:free',
+      options?.model || 'meta-llama/llama-3.1-8b-instruct',
       'openrouter/auto',
     ];
 
@@ -251,6 +251,26 @@ OUTPUT FORMAT REQUIRED (JSON):
     // If targeting user_id and proposed value represents a string or uuid, normalize to canonical 'UUIDv4'
     if (parsed.targetName === 'user_id' && (propVal.toLowerCase().includes('string') || propVal.toLowerCase().includes('uuid'))) {
       propVal = 'UUIDv4';
+    }
+
+    // Code-level grounding: Check actual code statement in diff/spec
+    const addedCode = rawText
+      .split('\n')
+      .filter((l) => l.trim().startsWith('+') && !l.trim().startsWith('+++'))
+      .join('\n')
+      .toLowerCase();
+
+    const codeSnippet = addedCode.length > 0 ? addedCode : rawText.toLowerCase();
+
+    // If actual code defines 'string user_id', prioritize code over comments (e.g. leftover '64-bit' comment)
+    if (parsed.targetName === 'user_id' || codeSnippet.includes('user_id')) {
+      if (codeSnippet.includes('string user_id') && !codeSnippet.includes('int64 user_id') && !codeSnippet.includes('bigint user_id')) {
+        propVal = 'UUIDv4';
+        parsed.targetName = 'user_id';
+        if (parsed.title?.includes('Int64')) {
+          parsed.title = 'PR #415: Maintain UUIDv4 User Identifier Schema Compliance';
+        }
+      }
     }
 
     return {

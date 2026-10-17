@@ -153,20 +153,22 @@ export async function runAdvisorAgent(
     options
   );
 
-  // Step 4: Save Resolution to FalkorDB and Mark Proposal 'RESOLVED'
+  // Step 4: Save Resolution to FalkorDB and Update Status
   const now = new Date().toISOString();
+  const finalStatus = violations.length === 0 ? 'APPROVED' : 'CONFLICT_DETECTED';
   cypherQueries.push(
-    `MATCH (p:Proposal {id: '${proposalId}'}) SET p.status = 'RESOLVED', p.resolved_at = $resolvedAt`
+    `MATCH (p:Proposal {id: '${proposalId}'}) SET p.status = '${finalStatus}', p.resolved_at = $resolvedAt`
   );
   await graph.query(
     `MATCH (p:Proposal {id: $proposalId})
-     SET p.status = 'RESOLVED',
+     SET p.status = $finalStatus,
          p.resolution_summary = $summary,
          p.resolution_json = $resolutionJson,
          p.resolved_at = $resolvedAt`,
     {
       params: {
         proposalId,
+        finalStatus,
         summary: resolution.executiveSummary,
         resolutionJson: JSON.stringify(resolution),
         resolvedAt: now,
