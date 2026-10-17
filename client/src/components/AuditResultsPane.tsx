@@ -262,16 +262,25 @@ export const AuditResultsPane: React.FC<AuditResultsPaneProps> = ({
         {/* ------------------------------------------------------------- */}
         {activeTab === 'memory' && (
           <div className="space-y-4">
-            <div className={isReportMode ? 'grid grid-cols-2 gap-5' : 'space-y-4'}>
-              {/* Recalled Memory Cards */}
-              <div className="space-y-2.5">
-                <div className="flex items-center justify-between text-xs font-mono text-neutral-400">
-                  <span className="flex items-center space-x-1.5 text-emerald-400 font-semibold">
-                    <Brain className="w-3.5 h-3.5 text-emerald-400" />
-                    <span>RECALLED EPISODIC MEMORY PRECEDENT</span>
-                  </span>
-                  <span className="text-[10px] text-neutral-500">{episodicMemory.length} Match</span>
-                </div>
+            {!proposalId ? (
+              <div className="text-center py-16 text-neutral-500 space-y-2">
+                <Brain className="w-8 h-8 text-neutral-600 mx-auto" />
+                <p className="text-xs font-mono text-neutral-400">Brain Idle • No Active Audit</p>
+                <p className="text-[11px] text-neutral-600">
+                  Run an audit on a proposal to recall historical incident precedents from FalkorDB episodic memory.
+                </p>
+              </div>
+            ) : (
+              <div className={isReportMode ? 'grid grid-cols-2 gap-5' : 'space-y-4'}>
+                {/* Recalled Memory Cards */}
+                <div className="space-y-2.5">
+                  <div className="flex items-center justify-between text-xs font-mono text-neutral-400">
+                    <span className="flex items-center space-x-1.5 text-emerald-400 font-semibold">
+                      <Brain className="w-3.5 h-3.5 text-emerald-400" />
+                      <span>RECALLED EPISODIC MEMORY PRECEDENT</span>
+                    </span>
+                    <span className="text-[10px] text-neutral-500">{episodicMemory.length} Match</span>
+                  </div>
 
                 {episodicMemory.length === 0 ? (
                   <div className="p-3.5 rounded-lg bg-[#0a0a0a] border border-white/[0.08] text-xs font-mono text-neutral-400">
@@ -375,6 +384,7 @@ export const AuditResultsPane: React.FC<AuditResultsPaneProps> = ({
                 </div>
               )}
             </div>
+            )}
           </div>
         )}
 

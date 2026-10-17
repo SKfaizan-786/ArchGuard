@@ -73,7 +73,7 @@ app.get('/api/presets', (_req: Request, res: Response) => {
       code: 'PR-409',
       title: 'PR #409: Migrate user_id from UUIDv4 to Int64 in auth-service',
       description: 'Proposes changing primary user_id from UUIDv4 to sequential 64-bit integer to optimize memory.',
-      expectedConflict: 'Violates ADR-001 (UUIDv4 mandate) and breaks 5 downstream consumers across Billing & Checkout.',
+      expectedConflict: 'Violates ADR-001 (UUIDv4 mandate) and breaks 3 downstream services across Billing & Checkout.',
       rawInput: `diff --git a/schemas/user.proto b/schemas/user.proto
 --- a/schemas/user.proto
 +++ b/schemas/user.proto

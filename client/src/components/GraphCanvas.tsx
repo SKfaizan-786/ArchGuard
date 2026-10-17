@@ -40,11 +40,11 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
   viewMode,
   onChangeViewMode,
 }) => {
-  // Pan & Zoom transform state
+  // Pan & Zoom transform state (k: 0.62 fits full 1250px constellation in split view)
   const [transform, setTransform] = useState<{ x: number; y: number; k: number }>({
-    x: 10,
-    y: 10,
-    k: 0.85,
+    x: 15,
+    y: 20,
+    k: 0.62,
   });
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
@@ -255,7 +255,7 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
   };
 
   const recenter = () => {
-    setTransform({ x: 20, y: 15, k: 0.85 });
+    setTransform({ x: 15, y: 20, k: 0.62 });
   };
 
   return (
