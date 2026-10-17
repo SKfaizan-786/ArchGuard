@@ -3,7 +3,7 @@ title: "Why LLM Code Reviewers Fail at Architecture—And How We Fixed It with a
 published: false
 description: "How we built ArchGuard for the WeMakeDevs x FalkorDB Hackathon: a 3-agent pre-merge guardian that uses deterministic multi-hop Cypher traversals and episodic memory instead of prompt bloat."
 tags: falkordb, wemakedevs, ai, architecture
-cover_image: "REPLACE_WITH_LANDING_PAGE_SCREENSHOT_URL"
+cover_image: "https://raw.githubusercontent.com/SKfaizan-786/ArchGuard/main/screenshots/ArchGuard01.png"
 ---
 
 ## The Friday Afternoon Outage Story
@@ -90,7 +90,7 @@ Instead of asking an LLM to guess whether an architectural decision was violated
 
 FalkorDB handles the deterministic graph traversal in **under 15 milliseconds** (often 9ms). The LLM's only job is to translate the raw input diff into AST parameters and synthesize a human-friendly remediation plan from historical precedents.
 
-![ArchGuard Constellation Canvas](REPLACE_WITH_SCREENSHOT_SPLIT_VIEW_PR409)
+![ArchGuard Constellation Canvas](https://raw.githubusercontent.com/SKfaizan-786/ArchGuard/main/screenshots/ArchGuard02.png)
 *Figure 1: ArchGuard Command Center showing real-time constellation topology, isolated collision path (red), and multi-hop blast radius.*
 
 ### The FinCore Domain Knowledge Graph
@@ -266,7 +266,7 @@ For `ADR-001`, FalkorDB immediately recalls **INC-2023-42**:
 
 Instead of an AI reviewer hallucinating advice, Agent 3 presents the **exact battle-tested compromise approved by company architects**.
 
-![Episodic Memory Recall UI](REPLACE_WITH_SCREENSHOT_MEMORY_TAB)
+![Episodic Memory Recall UI](https://raw.githubusercontent.com/SKfaizan-786/ArchGuard/main/screenshots/ArchGuard04.png)
 *Figure 2: Memory & Plan tab surfacing historical incident compromise INC-2023-42 with approved workaround steps and trade-offs.*
 
 ---
@@ -310,7 +310,7 @@ Seeing this in real-time demonstrates the immense power of in-memory graph datab
 
 Furthermore, we added a **zero-violation fast path**: If a developer fixes their code and changes `int64 user_id` back to `string user_id`, Agent 2 detects **0 violations and 0 blast radius**. ArchGuard skips the remediation LLM entirely, turns the proposal node emerald green (`:Proposal (Approved)`), and finishes the audit in milliseconds!
 
-![Green Glow Approved Proposal](REPLACE_WITH_SCREENSHOT_APPROVED_PR)
+![Green Glow Approved Proposal](https://raw.githubusercontent.com/SKfaizan-786/ArchGuard/main/screenshots/ArchGuard03.png)
 *Figure 3: Compliant proposals glow green on the pitch-black constellation canvas with zero blast radius.*
 
 ### 3. Bulletproof Offline Heuristic Fallback

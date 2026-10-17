@@ -18,6 +18,10 @@
   <em>“Linters check your syntax. ArchGuard protects your architecture.”</em>
 </p>
 
+<p align="center">
+  <img src="screenshots/ArchGuard01.png" alt="ArchGuard Hero Landing Page" width="100%" />
+</p>
+
 </div>
 
 ---
@@ -99,6 +103,10 @@ Instead of feeding arbitrary text to an LLM, ArchGuard compiles enterprise archi
 
 - **FalkorDB does the mathematical heavy lifting:** It executes multi-hop Cypher queries in `<15ms` to locate rule violations, downstream service impacts, and team owner handles.
 - **The LLM explains the graph's deterministic proof:** The LLM receives pre-calculated graph facts, completely eliminating hallucinations and context bloat.
+
+<p align="center">
+  <img src="screenshots/ArchGuard02.png" alt="ArchGuard Command Center Split View" width="100%" />
+</p>
 
 ---
 
