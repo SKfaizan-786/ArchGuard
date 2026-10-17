@@ -155,13 +155,16 @@ export const ProposalInputPane: React.FC<ProposalInputPaneProps> = ({
 
           {/* Preset / Custom Status Badge */}
           {selectedPreset ? (
-            <div className="p-2 rounded-lg bg-[#090909] border border-white/[0.06] flex flex-col space-y-1 text-xs">
+            <div
+              className="p-2.5 rounded-lg bg-[#090909] border border-white/[0.08] hover:border-amber-500/30 transition-all flex flex-col space-y-1.5 text-xs group"
+              title={`${selectedPreset.title}\n\n${selectedPreset.expectedConflict}`}
+            >
               <div className="flex items-center justify-between">
-                <span className="font-bold text-white text-[11px] truncate">
+                <span className="font-bold text-white text-[11px] leading-snug">
                   {selectedPreset.code}: {selectedPreset.title.split(':')[1]?.trim() || selectedPreset.title}
                 </span>
               </div>
-              <p className="text-[10px] text-neutral-400 font-sans line-clamp-1 leading-normal">
+              <p className="text-[10px] text-neutral-400 font-sans leading-relaxed">
                 {selectedPreset.expectedConflict}
               </p>
             </div>

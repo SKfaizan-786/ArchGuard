@@ -10,6 +10,7 @@ interface AgentVoiceBarProps {
   blastRadiusCount?: number;
   episodesCount?: number;
   agentTraces?: AgentTrace[];
+  adrCount?: number;
 }
 
 export const AgentVoiceBar: React.FC<AgentVoiceBarProps> = ({
@@ -20,12 +21,13 @@ export const AgentVoiceBar: React.FC<AgentVoiceBarProps> = ({
   blastRadiusCount = 0,
   episodesCount = 0,
   agentTraces = [],
+  adrCount = 5,
 }) => {
   const [displayedText, setDisplayedText] = useState<string>('');
   const [targetMessage, setTargetMessage] = useState<string>('');
 
   useEffect(() => {
-    let msg = 'Company Brain online. Grounded by 4 Architecture Decision Records in FalkorDB. Select a PR preset to audit.';
+    let msg = `Company Brain online. Grounded by ${adrCount} Architecture Decision Records in FalkorDB. Select a PR preset to audit.`;
 
     if (activeStep === 'extractor') {
       msg = '⚡ [ExtractorAgent] Reading FalkorDB graph catalog... Parsing diff parameters into structured target entity (:Proposal)...';

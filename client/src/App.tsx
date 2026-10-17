@@ -215,6 +215,7 @@ export const App: React.FC = () => {
         blastRadiusCount={auditPayload?.blastRadius?.length || 0}
         episodesCount={auditPayload?.episodicMemory?.length || 0}
         agentTraces={auditPayload?.agentTraces || []}
+        adrCount={nodes.filter((n) => n.label === 'ADR').length || 5}
       />
 
       {/* 3. Main 3-Pane Body */}
