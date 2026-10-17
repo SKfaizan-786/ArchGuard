@@ -581,49 +581,56 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
         </g>
       </svg>
 
-      {/* Floating Hover Tooltip (Resend-Style Instant Peek) */}
-      {hoveredNode && !selectedNode && (
-        <div
-          className="absolute pointer-events-none z-40 bg-[#0a0a0a]/95 backdrop-blur-xl border border-white/[0.15] rounded-xl p-3 shadow-2xl max-w-xs transition-all duration-150 animate-in fade-in"
-          style={{
-            left: Math.min(window.innerWidth - 320, hoverPos.x + 15),
-            top: Math.max(20, hoverPos.y - 40),
-          }}
-        >
-          <div className="flex items-center space-x-1.5 mb-1.5">
-            <span
-              className={`text-[9px] font-mono uppercase px-1.5 py-0.5 rounded font-bold border ${
-                getNodeVisual(hoveredNode.label, false).badgeBg
-              }`}
-            >
-              {hoveredNode.label}
-            </span>
-            <span className="text-[10px] font-mono text-neutral-400 truncate">
-              {getNodeShortCode(hoveredNode)}
-            </span>
+      {/* Floating Hover Tooltip (Resend-Style Instant Peek with Boundary-Aware Flip) */}
+      {hoveredNode && !selectedNode && (() => {
+        const containerWidth = svgRef.current?.clientWidth || 600;
+        const containerHeight = svgRef.current?.clientHeight || 600;
+        const isNearRightEdge = hoverPos.x > containerWidth * 0.65;
+
+        return (
+          <div
+            className="absolute pointer-events-none z-40 bg-[#0a0a0a]/95 backdrop-blur-xl border border-white/[0.15] rounded-xl p-3 shadow-2xl w-64 transition-all duration-150 animate-in fade-in"
+            style={{
+              left: isNearRightEdge ? hoverPos.x - 15 : hoverPos.x + 15,
+              transform: isNearRightEdge ? 'translateX(-100%)' : 'none',
+              top: Math.max(20, Math.min(hoverPos.y - 40, containerHeight - 160)),
+            }}
+          >
+            <div className="flex items-center space-x-1.5 mb-1.5">
+              <span
+                className={`text-[9px] font-mono uppercase px-1.5 py-0.5 rounded font-bold border ${
+                  getNodeVisual(hoveredNode.label, false).badgeBg
+                }`}
+              >
+                {hoveredNode.label}
+              </span>
+              <span className="text-[10px] font-mono text-neutral-400 truncate">
+                {getNodeShortCode(hoveredNode)}
+              </span>
+            </div>
+
+            <h5 className="text-xs font-semibold text-white leading-snug">
+              {hoveredNode.properties?.title || hoveredNode.properties?.name || hoveredNode.name}
+            </h5>
+
+            {hoveredNode.properties?.expected_value && (
+              <p className="text-[10px] font-mono text-emerald-400 mt-1">
+                Mandates: {hoveredNode.properties.expected_value}
+              </p>
+            )}
+
+            {hoveredNode.properties?.slack_channel && (
+              <p className="text-[10px] font-mono text-cyan-400 mt-1">
+                Slack: {hoveredNode.properties.slack_channel}
+              </p>
+            )}
+
+            <p className="text-[9px] text-neutral-500 font-mono mt-1.5 border-t border-white/[0.06] pt-1">
+              Click node to view full graph inspector
+            </p>
           </div>
-
-          <h5 className="text-xs font-semibold text-white leading-snug">
-            {hoveredNode.properties?.title || hoveredNode.properties?.name || hoveredNode.name}
-          </h5>
-
-          {hoveredNode.properties?.expected_value && (
-            <p className="text-[10px] font-mono text-emerald-400 mt-1">
-              Mandates: {hoveredNode.properties.expected_value}
-            </p>
-          )}
-
-          {hoveredNode.properties?.slack_channel && (
-            <p className="text-[10px] font-mono text-cyan-400 mt-1">
-              Slack: {hoveredNode.properties.slack_channel}
-            </p>
-          )}
-
-          <p className="text-[9px] text-neutral-500 font-mono mt-1.5 border-t border-white/[0.06] pt-1">
-            Click node to view full graph inspector
-          </p>
-        </div>
-      )}
+        );
+      })()}
 
       {/* Floating Glassmorphic Node Inspector Card (On Click) */}
       {selectedNode && (
