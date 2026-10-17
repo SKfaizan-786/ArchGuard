@@ -40,12 +40,22 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
   viewMode,
   onChangeViewMode,
 }) => {
-  // Pan & Zoom transform state (k: 0.62 fits full 1250px constellation in split view)
+  // Pan & Zoom transform state: responsive auto-scale based on viewMode
   const [transform, setTransform] = useState<{ x: number; y: number; k: number }>({
-    x: 15,
-    y: 20,
-    k: 0.62,
+    x: 10,
+    y: 15,
+    k: viewMode === 'canvas' ? 0.88 : 0.46,
   });
+
+  // Responsive auto-fit: adapt zoom scale when switching between Split View and Canvas Focus
+  React.useEffect(() => {
+    if (viewMode === 'canvas') {
+      setTransform({ x: 30, y: 25, k: 0.88 });
+    } else {
+      setTransform({ x: 10, y: 15, k: 0.46 });
+    }
+  }, [viewMode]);
+
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
   const [isolateCollision, setIsolateCollision] = useState<boolean>(false);
@@ -255,7 +265,11 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
   };
 
   const recenter = () => {
-    setTransform({ x: 15, y: 20, k: 0.62 });
+    if (viewMode === 'canvas') {
+      setTransform({ x: 30, y: 25, k: 0.88 });
+    } else {
+      setTransform({ x: 10, y: 15, k: 0.46 });
+    }
   };
 
   return (
