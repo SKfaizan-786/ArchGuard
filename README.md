@@ -12,6 +12,7 @@
 [![Stack](https://img.shields.io/badge/TypeScript-React_19_+_Express-blue.svg?style=for-the-badge&logo=typescript)](https://www.typescriptlang.org/)
 [![License](https://img.shields.io/badge/License-MIT-purple.svg?style=for-the-badge)](LICENSE)
 [![Demo Video](https://img.shields.io/badge/YouTube-2.5min_Demo_Video-red.svg?style=for-the-badge&logo=youtube)](https://youtu.be/qKTABIh2Djs)
+[![Dev.to Article](https://img.shields.io/badge/Dev.to-Flagship_Article-black.svg?style=for-the-badge&logo=devdotto)](https://dev.to/skfaizan786/why-llm-code-reviewers-fail-at-architecture-and-how-we-fixed-it-with-a-9ms-falkordb-knowledge-graph-144m)
 
 <br/>
 
@@ -355,4 +356,7 @@ Follow this 90-second script to experience the full power of ArchGuard:
 
 This project is licensed under the **MIT License** — see the [LICENSE](LICENSE) file for details.
 
-Built with ❤️ for the **WeMakeDevs x FalkorDB "Graph Hacks" Hackathon**.
+- 📖 **Technical Deep-Dive on Dev.to:** [Why LLM Code Reviewers Fail at Architecture—And How We Fixed It with a 9ms FalkorDB Knowledge Graph](https://dev.to/skfaizan786/why-llm-code-reviewers-fail-at-architecture-and-how-we-fixed-it-with-a-9ms-falkordb-knowledge-graph-144m)
+- 🎥 **YouTube Demo Walkthrough:** [https://youtu.be/qKTABIh2Djs](https://youtu.be/qKTABIh2Djs)
+
+Built with ❤️ by SK Faizanuddin for the **WeMakeDevs x FalkorDB "Graph Hacks" Hackathon** (Company Brain & Episodic Memory Track).
