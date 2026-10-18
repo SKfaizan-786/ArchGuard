@@ -11,6 +11,7 @@
 [![FalkorDB](https://img.shields.io/badge/FalkorDB-v6.8_Cypher-crimson.svg?style=for-the-badge&logo=redis)](https://github.com/FalkorDB/FalkorDB)
 [![Stack](https://img.shields.io/badge/TypeScript-React_19_+_Express-blue.svg?style=for-the-badge&logo=typescript)](https://www.typescriptlang.org/)
 [![License](https://img.shields.io/badge/License-MIT-purple.svg?style=for-the-badge)](LICENSE)
+[![Demo Video](https://img.shields.io/badge/YouTube-2.5min_Demo_Video-red.svg?style=for-the-badge&logo=youtube)](https://youtu.be/qKTABIh2Djs)
 
 <br/>
 
@@ -306,6 +307,8 @@ npm run dev:all
 ---
 
 ## 🎬 Live Demo Walkthrough for Judges
+
+> 📺 **Watch the Full Video Walkthrough on YouTube:** [https://youtu.be/qKTABIh2Djs](https://youtu.be/qKTABIh2Djs)
 
 Follow this 90-second script to experience the full power of ArchGuard:
 
